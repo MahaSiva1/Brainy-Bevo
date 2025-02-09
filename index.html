@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bevo Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+           /* background-color: #fce6ca; */
+            background-image: url('IMG_0470.png');
+            background-size: cover;
+            background-position: center;
+            color: #bf5700;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #bf5700;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .header button {
+            
+            background: #ffffff;
+            color: #bf5700;
+            padding: 20px 50px;
+            border: 2px solid #bf5700;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            margin-right: 45px;  
+
+        }
+        .header button:hover {
+            background: #ff8000;
+        }
+        .container {
+            margin: 50px auto;
+            max-width: 800px;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .bevo {
+            font-size: 10rem;
+            margin: 50px 0;
+        }
+        .timer {
+            font-size: 3rem;
+            margin: 20px;
+            border: 2px solid #bf5700;
+            padding: 10px;
+            display: inline-block;
+            border-radius: 10px;
+        }
+        .controls button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            background: #bf5700;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+        }
+        .controls button:hover {
+            background: #ff8000;
+        }
+        .slider-container {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .slider-container input {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .message {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: #bf5700;
+        }
+        #bevoAnimation {
+        width: 410px;
+        height: 310px;
+        position: relative;  /* This enables left/right positioning */
+        left: 160px;         
+        object-fit: contain; /* Ensures the aspect ratio is preserved */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="brainy_bevo.png" alt="Logo" style="width: 200px; height: auto;">
+        <button onclick="toggleSettings()">Settings</button>
+        <button onclick="toggleTasks()">Tasks</button>
+    </div>
+
+    <div class="container">
+        <div id="animationContainer"></div>
+        <img src="Bevo_still.png" width="400" height="300" style="position: relative; left: 11px; top: 20px;">
+        <div id="logo" class="section active">
+            <p>Welcome to Bevo Timer!</p>
+        </div>
+
+        <div id="settings" class="section">
+            <h3>Settings</h3>
+            <div class="slider-container">
+                <label for="studyTime">Study Time:</label>
+                <input type="range" id="studyTime" min="1" max="60" value="25" onchange="updateTime('study', this.value)">
+                <span id="studyTimeValue">25</span> min
+            </div>
+            <div class="slider-container">
+                <label for="breakTime">Break Time:</label>
+                <input type="range" id="breakTime" min="2" max="30" value="5" onchange="updateTime('break', this.value)">
+                <span id="breakTimeValue">5</span> min
+            </div>
+        </div>
+
+        <div id="tasks" class="section">
+            <h3>Tasks</h3>
+            <div id="taskList"></div>
+            <input type="text" id="taskInput" placeholder="Enter a task">
+            <button onclick="addTask()">Add Task</button>
+        </div>
+
+        <div id="timer" class="timer">25:00</div>
+        <div id="message" class="message"></div>
+        <div class="controls">
+            <button onclick="startTimer()">Start</button>
+            <button onclick="pauseTimer()">Pause</button>
+            <button onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 1500;
+        let timer;
+        let isRunning = false;
+        let studyTime = 25;
+        let breakTime = 5;
+        let isStudySession = true;
+        let settingsVisible = true;
+        let tasksVisible = false;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById("timer").textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                document.getElementById("settings").classList.remove("active");
+
+
+                let stillImage = document.querySelector('img[src="Bevo_still.png"]');
+                if (stillImage) {
+                    stillImage.style.display = "none"; // Hide the still image
+                } 
+                
+               // document.getElementById("animationContainer").appendChild(bevoGif);
+
+               let existingGif = document.getElementById("bevoAnimation");
+                if (existingGif) {
+                    existingGif.remove();
+                }
+                
+                let bevoGif = document.createElement("img");
+                bevoGif.id = "bevoAnimation";
+                bevoGif.style.width = "400px";  // Adjust width if needed
+                bevoGif.style.height = "300px"; // Adjust height if needed
+                bevoGif.style.position = "relative";
+                bevoGif.style.left = "11px";    // Same position as static image
+                bevoGif.style.top = "20px";     // Same position as static image
+                
+                // Check which session (study or break) and set the appropriate GIF
+                if (isStudySession) {
+                    bevoGif.src = "study_bevo.gif";  // Study session GIF
+                } else {
+                    bevoGif.src = "Sleepy_bevo.gif";  // Break session GIF
+                }
+
+                document.getElementById("animationContainer").appendChild(bevoGif);
+
+                //clearInterval(timer);
+
+
+                timer = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timer);
+                        isRunning = false;
+
+                        let existingGif = document.getElementById("bevoAnimation");
+                        if (existingGif) {
+                            existingGif.remove();
+                        }
+
+                        // Show the still image again after the timer ends
+                        let stillImage = document.querySelector('img[src="Bevo_still.png"]');
+                        if (stillImage) {
+                            stillImage.style.display = "block"; // Show the still image
+                        }
+
+
+                        if (isStudySession) {
+                            document.getElementById("message").textContent = "Study time is over! Break time starts now!";
+                            let bellSound = new Audio("tower_bell.mp3");
+                            bellSound.play();
+                            timeLeft = breakTime * 60;
+
+                        } else {
+                            document.getElementById("message").textContent = "Break time is over! Back to studying!";
+                            timeLeft = studyTime * 60;
+                            bellSound.play();
+                            
+                        }
+
+                        isStudySession = !isStudySession;
+
+                        setTimeout(startTimer, 1000);
+                    }
+                },1000);
+            }
+        }
+
+        function pauseTimer() {
+            clearInterval(timer);
+            isRunning = false;
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            isStudySession = true;
+            timeLeft = studyTime * 60;
+            document.getElementById("message").textContent = "";
+            updateTimerDisplay();
+        }
+
+        function updateTime(type, value) {
+            document.getElementById(`${type}TimeValue`).textContent = value;
+            if (type === 'study') {
+                studyTime = value;
+                if (isStudySession) {
+                    timeLeft = studyTime * 60;
+                    updateTimerDisplay();
+                }
+            } else if (type === 'break') {
+                breakTime = value;
+            }
+        }
+
+        function toggleSettings() {
+            settingsVisible = !settingsVisible;
+            const settingsSection = document.getElementById("settings");
+            if (settingsVisible) {
+                settingsSection.classList.add("active");
+            } else {
+                settingsSection.classList.remove("active");
+            }
+        }
+
+        function toggleTasks() {
+            tasksVisible = !tasksVisible;
+            const tasksSection = document.getElementById("tasks");
+            if (tasksVisible) {
+                tasksSection.classList.add("active");
+            } else {
+                tasksSection.classList.remove("active");
+            }
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById("taskInput");
+            const taskList = document.getElementById("taskList");
+            if (taskInput.value.trim() !== "") {
+                const taskItem = document.createElement("div");
+                taskItem.innerHTML = `<label><input type='checkbox'> ${taskInput.value}</label>`;
+                taskList.appendChild(taskItem);
+                taskInput.value = "";
+            }
+        }
+
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
