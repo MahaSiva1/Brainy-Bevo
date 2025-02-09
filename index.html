@@ -92,9 +92,9 @@
         #bevoAnimation {
         width: 410px;
         height: 310px;
-        position: relative;  /* This enables left/right positioning */
+        position: relative;  
         left: 160px;         
-        object-fit: contain; /* Ensures the aspect ratio is preserved */
+        object-fit: contain; 
         }
 
     </style>
@@ -179,13 +179,13 @@
                 
                 let bevoGif = document.createElement("img");
                 bevoGif.id = "bevoAnimation";
-                bevoGif.style.width = "400px";  // Adjust width if needed
-                bevoGif.style.height = "300px"; // Adjust height if needed
+                bevoGif.style.width = "400px";  //  width 
+                bevoGif.style.height = "300px"; //  height 
                 bevoGif.style.position = "relative";
-                bevoGif.style.left = "11px";    // Same position as static image
-                bevoGif.style.top = "20px";     // Same position as static image
+                bevoGif.style.left = "11px";    // 
+                bevoGif.style.top = "20px";     // 
                 
-                // Check which session (study or break) and set the appropriate GIF
+                // GIF control 
                 if (isStudySession) {
                     bevoGif.src = "study_bevo.gif";  // Study session GIF
                 } else {
@@ -213,7 +213,7 @@
                         // Show the still image again after the timer ends
                         let stillImage = document.querySelector('img[src="Bevo_still.png"]');
                         if (stillImage) {
-                            stillImage.style.display = "block"; // Show the still image
+                            stillImage.style.display = "block"; 
                         }
 
 
